@@ -1,269 +1,289 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
-    "metadata": {
-      "_generator": {
-        "name": "bicep",
-        "version": "0.8.9.13224",
-        "templateHash": "15495738823141086515"
-      }
-    },
-  
-  
-    "parameters": {
-      "adminUsername": {
-        "type": "string"
-      },
-  
-  
-      "adminPassword": {
-        "type": "secureString"
-      },
-  
-  
-      "dnsLabelPrefix": {
-        "type": "string",
-        "defaultValue": "[toLower(format('{0}-{1}', parameters('vmName'), uniqueString(resourceGroup().id, parameters('vmName'))))]"
-      },
-  
-  
-      "publicIpName": {
-        "type": "string",
-        "defaultValue": "myPublicIP"
-      },
-  
-  
-      "publicIPAllocationMethod": {
-        "type": "string",
-        "defaultValue": "Static"
-      },
-  
-  
-      "publicIpSku": {
-        "type": "string",
-        "defaultValue": "Standard"
-      },
-  
-  
-      "OSVersion": {
-        "type": "string",
-        "defaultValue": "win10-21h2-pro-g2"
-      },
-  
-  
-      "vmSize": {
-        "type": "string",
-        "defaultValue": "Standard_D4s_v3"
-      },
-  
-  
-      "location": {
-        "type": "string",
-        "defaultvalue": "canadacentral"
-      },
-  
-  
-      "vmName": {
-        "type": "string",
-        "defaultValue": "Grid-VM"
-      }
-  
-  
-    },
-  
-  
-    "variables": {
-      "storageAccountName": "[format('bootdiags{0}', uniqueString(resourceGroup().id))]",
-      "nicName": "Grid-NIC",
-      "addressPrefix": "10.0.10.0/24",
-      "subnetName": "Grid-Subnet",
-      "subnetPrefix": "10.0.10.0/24",
-      "virtualNetworkName": "Grid-VNet",
-      "networkSecurityGroupName": "Grid-NSG"
-    },
-  
-  
-    "resources": [
-      {
-        "type": "Microsoft.Storage/storageAccounts",
-        "apiVersion": "2021-04-01",
-        "name": "[variables('storageAccountName')]",
-        "location": "[parameters('location')]",
-        "sku": {
-          "name": "Standard_LRS"
-        },
-        "kind": "Storage"
-      },
-  
-  
-      {
-        "type": "Microsoft.Network/publicIPAddresses",
-        "apiVersion": "2020-08-01",
-        "name": "[parameters('publicIpName')]",
-        "location": "[parameters('location')]",
-        "sku": {
-          "name": "[parameters('publicIpSku')]"
-        },
-        "properties": {
-          "publicIPAllocationMethod": "[parameters('publicIPAllocationMethod')]",
-          "dnsSettings": {
-            "domainNameLabel": "[parameters('dnsLabelPrefix')]"
-          }
-        }
-      },
-  
-  
-      {
-        "type": "Microsoft.Network/networkSecurityGroups",
-        "apiVersion": "2020-08-01",
-        "name": "[variables('networkSecurityGroupName')]",
-        "location": "[parameters('location')]",
-        "properties": {
-          "securityRules": [
-            {
-              "name": "default-allow-3389",
-              "properties": {
-                "priority": 300,
-                "access": "Allow",
-                "direction": "Inbound",
-                "destinationPortRange": "3389",
-                "protocol": "Tcp",
-                "sourcePortRange": "*",
-                "sourceAddressPrefix": "*",
-                "destinationAddressPrefix": "*"
-              }
-            }
-          ]
-        }
-      },
-  
-  
-      {
-        "type": "Microsoft.Network/virtualNetworks",
-        "apiVersion": "2020-08-01",
-        "name": "[variables('virtualNetworkName')]",
-        "location": "[parameters('location')]",
-        "properties": {
-          "addressSpace": {
-            "addressPrefixes": [
-              "[variables('addressPrefix')]"
-            ]
-          },
-          "subnets": [
-            {
-              "name": "[variables('subnetName')]",
-              "properties": {
-                "addressPrefix": "[variables('subnetPrefix')]",
-                "networkSecurityGroup": {
-                  "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
-                }
-              }
-            }
-          ]
-        },
-        "dependsOn": [
-          "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
-        ]
-      },
-  
-  
-      {
-        "type": "Microsoft.Network/networkInterfaces",
-        "apiVersion": "2020-08-01",
-        "name": "[variables('nicName')]",
-        "location": "[parameters('location')]",
-        "properties": {
-          "ipConfigurations": [
-            {
-              "name": "ipconfig1",
-              "properties": {
-                "privateIPAllocationMethod": "Static",
-                "publicIPAddress": {
-                  "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIpName'))]"
-                },
-                "subnet": {
-                  "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]"
-                }
-              }
-            }
-          ]
-        },
-        "dependsOn": [
-          "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIpName'))]",
-          "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
-        ]
-      },
-  
-  
-      {
-        "type": "Microsoft.Compute/virtualMachines",
-        "apiVersion": "2021-03-01",
-        "name": "[parameters('vmName')]",
-        "location": "[parameters('location')]",
-        "properties": {
-          "hardwareProfile": {
-            "vmSize": "[parameters('vmSize')]"
-          },
-          "osProfile": {
-            "computerName": "[parameters('vmName')]",
-            "adminUsername": "[parameters('adminUsername')]",
-            "adminPassword": "[parameters('adminPassword')]",
-            "windowsConfiguration": {
-                "enableAutomaticUpdates": true,
-                "patchSettings": {
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.8.9.13224",
+      "templateHash": "15495738823141086515"
+    }
+  },
 
-                    "patchMode": "AutomaticByOS",
-                    "assessmentMode": "ImageDefault",
-                    "enableHotpatching": true
-                }
-            }
-            
-          },
-          "storageProfile": {
-            "imageReference": {
-              "publisher": "MicrosoftWindowsServer",
-              "offer": "WindowsServer",
-              "sku": "[parameters('OSVersion')]",
-              "version": "latest"
-            },
-            "osDisk": {
-              "createOption": "FromImage",
-              "managedDisk": {
-                "storageAccountType": "StandardSSD_LRS"
-              }
-            },
-            "dataDisks": [
-              {
-                "diskSizeGB": 1023,
-                "lun": 0,
-                "createOption": "Empty"
-              }
-            ]
-          },
-          "networkProfile": {
-            "networkInterfaces": [
-              {
-                "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
-              }
-            ]
-          },
-          "diagnosticsProfile": {
-            "bootDiagnostics": {
-              "enabled": true,
-              "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))).primaryEndpoints.blob]"
+
+  "parameters": {
+    "location": {
+            "type": "string",
+            "defaultValue": "canadacentral"
+    },
+        
+    "adminUsername": {
+      "type": "string",
+      "defaultvalue": "taxtron"
+    },
+
+    "adminPassword": {
+      "type": "String",
+      "defaultvalue": "Qwerty@1010!!??"
+    },
+    
+    "publicIpName": {
+      "type": "string",
+      "defaultValue": "Grid-Public-IP"
+    },
+
+    "publicIPAllocationMethod": {
+      "type": "string",
+      "defaultValue": "Static"
+    },
+
+    "publicIpSku": {
+      "type": "string",
+      "defaultValue": "Standard"
+    },
+
+    "OSVersion": {
+      "type": "string",
+      "defaultValue": "win10-21h2-pro-g2"
+    },
+    
+    "vmSize": {
+      "type": "string",
+      "defaultValue": "Standard_D4s_v3",
+      "metadata": {
+        "description": "Size of the virtual machine."
+      }
+    },
+
+    "vmName": {
+      "type": "string",
+      "defaultValue": "Grid-VM"
+    },
+
+    "vmComputerName": {
+        "type": "string",
+        "defaultvalue": "Grid-VM"
+    },
+
+    "nicName": {
+            "type": "string",
+            "defaultvalue": "grid-vm857"
+    },
+
+
+    "nsgName": {
+            "type": "string",
+            "defaultvalue": "Grid-VM-nsg"
+    },
+
+    "patchMode": {
+        "type": "string",
+        "defaultvalue": "AutomaticByOS"
+    },
+
+
+    "subnetName": {
+        "type": "string",
+        "defaultvalue": "Grid-Subnet"
+    },
+
+    "virtualNetworkName": {
+        "type": "string",
+        "defaultvalue": "Grid-vnet"
+    },
+
+
+    "enableHotpatching": {
+        "type": "bool",
+        "defaultvalue": false
+    }
+
+
+
+
+  },
+
+
+  "variables": {
+    "storageAccountName": "[format('bootdiags{0}', uniqueString(resourceGroup().id))]",
+    "nicName": "myVMNic",
+    "addressPrefix": "10.0.10.0/16",
+    "subnetName": "Subnet",
+    "subnetPrefix": "10.0.10.0/24",
+    "virtualNetworkName": "MyVNET",
+    "networkSecurityGroupName": "default-NSG"
+  },
+
+
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2021-04-01",
+      "name": "[variables('storageAccountName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Standard_LRS"
+      },
+      "kind": "Storage"
+    },
+
+
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2021-02-01",
+      "name": "[parameters('publicIpName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "[parameters('publicIpSku')]"
+      },
+       "properties": {
+        "publicIPAllocationMethod": "[parameters('publicIPAllocationMethod')]"
+      }
+    },
+
+
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2021-02-01",
+      "name": "[variables('networkSecurityGroupName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "default-allow-3389",
+            "properties": {
+              "priority": 1000,
+              "access": "Allow",
+              "direction": "Inbound",
+              "destinationPortRange": "3389",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*"
             }
           }
-        },
-        "dependsOn": [
-          "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]",
-          "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
         ]
       }
-    ],
-    "outputs": {
-      "hostname": {
-        "type": "string",
-        "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIpName'))).dnsSettings.fqdn]"
-      }
+    },
+
+
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2021-02-01",
+      "name": "[variables('virtualNetworkName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('addressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('subnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('subnetPrefix')]",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+              }
+            }
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+      ]
+    },
+
+
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2021-02-01",
+      "name": "[variables('nicName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIpName'))]"
+              },
+              "subnet": {
+                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]"
+              }
+            }
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIpName'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
+      ]
+    },
+
+
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2021-03-01",
+      "name": "[parameters('vmName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[parameters('vmName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "MicrosoftWindowsDesktop",
+            "offer": "Windows-10",
+            "sku": "[parameters('OSVersion')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "createOption": "FromImage",
+            "managedDisk": {
+              "storageAccountType": "StandardSSD_LRS"
+            }
+          },
+          "dataDisks": [
+            {
+              "diskSizeGB": 1023,
+              "lun": 0,
+              "createOption": "Empty"
+            }
+          ]
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": true,
+            "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))).primaryEndpoints.blob]"
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+      ]
+    }
+  ],
+
+
+  "outputs": {
+    "hostname": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIpName'))).dnsSettings.fqdn]"
     }
   }
+}
