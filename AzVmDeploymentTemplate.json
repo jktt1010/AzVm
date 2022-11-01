@@ -202,8 +202,8 @@
         },
         "storageProfile": {
           "imageReference": {
-            "publisher": "MicrosoftWindowsServer",
-            "offer": "WindowsServer",
+            "publisher": "MicrosoftWindowsDesktop",
+            "offer": "Windows-10",
             "sku": "[parameters('OSVersion')]",
             "version": "latest"
           },
