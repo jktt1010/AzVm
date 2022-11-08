@@ -11,11 +11,11 @@ spec:
     - name: web
       protocol: TCP
       port: 4444
-      targetPort: 4545
     - name: node
       protocol: TCP
       port: 5555
-      targetPort: 5454
+   externalTrafficPolicy: Local
+   type: LoadBalancer
 
 ---
 apiVersion: apps/v1
