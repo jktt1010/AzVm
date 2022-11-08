@@ -14,8 +14,8 @@ spec:
     - name: node
       protocol: TCP
       port: 5555
-   externalTrafficPolicy: Local
-   type: LoadBalancer
+  externalTrafficPolicy: Local
+  type: LoadBalancer
 
 ---
 apiVersion: apps/v1
