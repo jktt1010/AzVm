@@ -11,13 +11,14 @@ spec:
   ports:
     - name: web
       protocol: TCP
-      port: 4444
+      port: 30001
       nodePort: 4444
+      targetPort: 4444
       
     - name: node
       protocol: TCP
-      port: 5555
       nodePort: 5555
+      targetPort: 5555
   externalTrafficPolicy: Local
   type: LoadBalancer
 
