@@ -5,15 +5,19 @@ metadata:
   labels:
     name: selenium-hub
 spec:
+  type: NodePort
   selector:
     app: selenium-hub
   ports:
     - name: web
       protocol: TCP
       port: 4444
+      nodePort: 4444
+      
     - name: node
       protocol: TCP
       port: 5555
+      nodePort: 5555
   externalTrafficPolicy: Local
   type: LoadBalancer
 
