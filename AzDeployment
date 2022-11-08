@@ -12,12 +12,10 @@ spec:
       protocol: TCP
       port: 4444
       targetPort: 4444
-      NodePort: 4444
     - name: node
       protocol: TCP
       port: 5555
       targetPort: 5555
-      NodePort: 5555
 
 ---
 apiVersion: apps/v1
