@@ -14,7 +14,7 @@ spec:
       targetPort: 4444 
     - name: node
       protocol: TCP
-      Port: 5555
+      port: 5555
       targetPort: 5555      
   externalTrafficPolicy: Local
   type: LoadBalancer
