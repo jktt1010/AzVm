@@ -11,8 +11,8 @@ spec:
   ports:
     - name: web
       protocol: TCP
-      port: 30001
-      nodePort: 4444
+      port: 4444 
+      nodePort: 32222
       targetPort: 4444
       
     - name: node
